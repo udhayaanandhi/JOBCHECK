@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% block title %}History | JobCheck{% endblock %}{% block body %}
+<section class="sec" style="padding-top:44px"><div class="hd"><span class="k">Scan history</span><h2>Your previous analyses.</h2><p>Open a safety report or tell us if a prediction looked wrong. Feedback is stored for review; it does not retrain the models.</p></div>
+{% if thanks %}<div class="ok">Thanks, your feedback was saved.</div>{% endif %}
+<div class="card tw">{% if rows %}<table><tr><th>#</th><th>When</th><th style="text-align:left">Job title</th><th>Verdict</th><th>Votes</th><th>Report</th><th>Feedback</th></tr>
+{% for r in rows %}<tr><td>{{ r.id }}</td><td>{{ r.created }}</td><td style="text-align:left">{{ r.title or '(untitled)' }}</td><td><span class="pill {{ 'pf' if r.label=='Potentially Fake' else 'pg' }}">{{ r.label }}</span></td><td>{{ r.fake_votes }}/{{ r.total }} fake</td><td><a class="btn g sm" href="/report/{{ r.id }}">Download</a></td>
+<td style="min-width:200px"><details><summary>{{ r.fb }} sent · add</summary><form method="POST" action="/feedback/{{ r.id }}"><select name="opinion"><option value="incorrect_fake">Should be genuine</option><option value="incorrect_genuine">Should be fake</option><option value="other">Other</option></select><input name="note" placeholder="Optional note"><button class="btn g sm">Send</button></form></details></td></tr>{% endfor %}</table>
+{% else %}<p>No scans yet. <a href="/" style="color:var(--ac)">Check a job posting</a> to get started.</p>{% endif %}</div></section>{% endblock %}

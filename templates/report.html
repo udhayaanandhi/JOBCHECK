@@ -1,0 +1,10 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>JobCheck Safety Report #{{ scan.id }}</title>
+<style>body{font-family:Segoe UI,Arial,sans-serif;max-width:800px;margin:30px auto;padding:0 20px;color:#1a1f2e;line-height:1.55}h1{margin-bottom:0}h2{border-bottom:2px solid #e5e8ef;padding-bottom:6px;margin-top:30px}.v{display:inline-block;padding:6px 14px;border-radius:99px;font-weight:700;background:{{ '#fde2e2' if p.final.prediction==1 else '#d9f5e8' }};color:{{ '#b42318' if p.final.prediction==1 else '#067647' }}}table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid #e5e8ef;text-align:left}small{color:#667085}</style></head><body>
+<h1>JobCheck Safety Report</h1><small>Report #{{ scan.id }} · generated {{ scan.created }}</small>
+<h2>Overall prediction</h2><p><span class="v">{{ p.final.label }}</span> &nbsp; {{ p.fv }} of {{ p.results|length }} classifiers flagged this posting as fake.</p><p>{{ p.split.text }}</p>
+<h2>Job details</h2><table>{% for k,l in labels.items() %}{% if p.submitted.get(k) %}<tr><th>{{ l }}</th><td>{{ p.submitted[k] }}</td></tr>{% endif %}{% endfor %}</table>
+<h2>Individual model results</h2><table>{% for r in p.results %}<tr><td>{{ r.model }}</td><td>{{ r.label }}</td></tr>{% endfor %}</table>
+<h2>Warning signs</h2>{% if p.warnings %}<table>{% for w in p.warnings %}<tr><td><b>{{ w.rule }}</b><br>"{{ w.phrase }}" in {{ w.field }}<br><small>{{ w.why }}</small></td></tr>{% endfor %}</table><p><small>A warning is not proof of fraud.</small></p>{% else %}<p>No rule-based warning phrases were found. This does not guarantee the job is genuine.</p>{% endif %}
+{% if p.employer %}<h2>Employer consistency checks</h2><table>{% for c in p.employer %}<tr><td><b>{{ c.label }}</b><br><small>{{ c.detail }}</small></td></tr>{% endfor %}</table><p><small>These compare details you entered. They do not verify the company.</small></p>{% endif %}
+<h2>Safety recommendations</h2><ul>{% for r in recs %}<li>{{ r }}</li>{% endfor %}</ul>
+<p><small>JobCheck is an academic prediction demo. Predictions are guidance, not proof.</small></p></body></html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}JobCheck | Check before you apply{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"></head><body>
+<header class="nav"><div class="wrap"><a class="brand" href="/"><i>✓</i><span>job<b>check.</b></span></a>
+<nav><a href="/" class="{{ 'on' if request.path=='/' }}">Job checker</a><a href="/dataset" class="{{ 'on' if request.path=='/dataset' }}">Dataset</a><a href="/performance" class="{{ 'on' if request.path=='/performance' }}">Performance</a><a href="/history" class="{{ 'on' if request.path=='/history' }}">History</a></nav></div></header>
+<main class="wrap">{% block body %}{% endblock %}</main>
+<footer><div class="wrap">JobCheck · Check before you apply. Predictions are guidance, not proof that a job is genuine or fraudulent.</div></footer>
+<script>
+(function(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+  const nodes = document.querySelectorAll('.hero, .sec > .hd, .sec > .grid, .sec > .card, .sec > .ban, .sec > .callout, .sec > .up');
+  nodes.forEach(el=>el.classList.add('reveal'));
+  document.body.classList.add('js-motion');
+  const observer=new IntersectionObserver(entries=>entries.forEach(entry=>{
+    if(entry.isIntersecting){entry.target.classList.add('in-view');observer.unobserve(entry.target)}
+  }),{threshold:0.08,rootMargin:'0px 0px -20px 0px'});
+  nodes.forEach(el=>observer.observe(el));
+})();
+</script></body></html>

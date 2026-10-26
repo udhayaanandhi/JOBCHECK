@@ -1,0 +1,70 @@
+{% extends "base.html" %}{% block body %}
+<section class="hero"><div class="hero-kicker">A little clarity goes a long way</div><h1>Your next job should be a <span class="gt">safe one.</span></h1>
+<p>Paste a job posting. Six trained classifiers review its language, and JobCheck highlights the warning signs behind the result.</p>
+<a href="#checker" class="btn">Check a job posting ↗</a></section>
+
+<section class="sec" id="checker"><div class="grid g2">
+<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:18px"><div><span class="k">Step 01 / Job details</span><h3>Tell us about the opportunity</h3></div>
+<button type="button" class="btn g sm" id="sample">✦ Try a sample</button></div>
+{% if error %}<div class="err">{{ error }}</div>{% endif %}
+<form method="POST" action="/#results" id="jobForm">
+<div class="frow"><div><label for="title">Job title <span>*</span></label><input id="title" name="title" placeholder="e.g. Junior Data Analyst" value="{{ submitted.get('title','') }}" required></div>
+<div><label for="location">Job location</label><input id="location" name="location" placeholder="e.g. Bengaluru, India" value="{{ submitted.get('location','') }}"></div></div>
+<label for="company_profile">About the company</label><textarea id="company_profile" name="company_profile" rows="3" placeholder="What does the company say about itself?">{{ submitted.get('company_profile','') }}</textarea>
+<label for="description">Job description <span>*</span></label><textarea id="description" name="description" rows="5" placeholder="Paste the responsibilities, duties and other details..." required>{{ submitted.get('description','') }}</textarea>
+<label for="requirements">Skills &amp; requirements</label><textarea id="requirements" name="requirements" rows="3" placeholder="Education, experience, skills...">{{ submitted.get('requirements','') }}</textarea>
+<label for="benefits">Benefits &amp; compensation</label><textarea id="benefits" name="benefits" rows="3" placeholder="Salary, bonuses, insurance, perks...">{{ submitted.get('benefits','') }}</textarea>
+<span class="k" style="margin-top:6px">Employer details (optional, for the consistency checklist)</span>
+<div class="frow frow3"><div><label for="website">Company website</label><input id="website" name="website" placeholder="example.com" value="{{ submitted.get('website','') }}"></div>
+<div><label for="recruiter_email">Recruiter email</label><input id="recruiter_email" name="recruiter_email" placeholder="hr@example.com" value="{{ submitted.get('recruiter_email','') }}"></div>
+<div><label for="contact">Contact details</label><input id="contact" name="contact" placeholder="Phone or chat handle" value="{{ submitted.get('contact','') }}"></div></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><p style="font-size:13px">◈ Only enter information from the job advertisement.</p>
+<button class="btn" type="submit" {% if not ready %}disabled{% endif %}>Analyze job posting ↗</button></div></form></div>
+<aside class="card"><span class="k">A quick reminder</span><h3>Stay curious. Stay cautious.</h3><p style="font-size:14px">A job offer should make sense, not make you feel rushed.</p>
+<div class="w"><div><b>Upfront payments</b><small>Be cautious if asked to pay to get hired.</small></div></div>
+<div class="w"><div><b>Unrealistic promises</b><small>Very high pay with no requirements deserves scrutiny.</small></div></div>
+<div class="w"><div><b>Unverified recruiters</b><small>Check the official website and contact details.</small></div></div></aside></div></section>
+
+{% if results and vote_result %}
+<section class="sec" id="results"><div class="hd"><span class="k">Your analysis is ready</span><h2>Here's what we found.</h2></div>
+<div class="ban {{ vote_result['class'] }}">
+<svg width="104" height="104" viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#e7d5ca" stroke-width="10"/><circle cx="50" cy="50" r="42" fill="none" stroke="{{ '#f87171' if vote_result.prediction==1 else '#34d399' }}" stroke-width="10" stroke-linecap="round" stroke-dasharray="{{ (fake_votes/(results|length)*264)|round(1) }} 264" transform="rotate(-90 50 50)"/><text x="50" y="58" text-anchor="middle" fill="#303330" font-size="24" font-weight="800">{{ fake_votes }}/{{ results|length }}</text></svg>
+<div class="t"><span class="k" style="color:{{ 'var(--rd)' if vote_result.prediction==1 else 'var(--gr)' }}">Overall assessment</span>
+<div class="big">{% if vote_result.prediction==1 %}Potentially Fake Job{% else %}Likely Genuine Job{% endif %}</div>
+<p style="margin-top:8px">{% if vote_result.prediction==1 %}This posting shows patterns associated with suspicious job advertisements. Verify the employer independently before sharing personal information or making payments.{% else %}This posting appears more consistent with genuine job advertisements. You should still verify the company and recruiter before proceeding.{% endif %}</p></div>
+<span class="pill {{ 'pf' if vote_result.prediction==1 else 'pg' }}">{{ 'Review carefully' if vote_result.prediction==1 else 'Looks promising' }}</span></div>
+
+<div class="callout {{ split.level }}"><b>{{ 'Model disagreement' if split.level=='split' else 'Model agreement' }}</b><p>{{ split.text }}</p></div>
+
+<div class="grid g2" style="margin-top:22px">
+<div class="card"><span class="k">Model breakdown</span><h3>Prediction comparison</h3><p style="font-size:13px;margin-bottom:8px">Each bar is a model's categorical decision, not a probability.</p>
+{% for r in results %}<div class="mr {{ 'fin' if r.model=='Hard Voting Classifier' }}"><span>{{ r.model }}{{ ' ★' if r.model=='Hard Voting Classifier' }}</span><div class="bar"><i class="{{ 'f' if r.prediction==1 else 'g' }}" style="width:100%"></i></div><span class="pill {{ 'pf' if r.prediction==1 else 'pg' }}">{{ 'Fake' if r.prediction==1 else 'Genuine' }}</span></div>{% endfor %}</div>
+<div class="card"><span class="k">At a glance</span><h3>Prediction summary</h3>
+<div class="grid e2" style="gap:12px;margin:16px 0"><div class="stat"><p>Genuine</p><div class="big" style="color:var(--gr)">{{ genuine_votes }}</div></div><div class="stat"><p>Fake</p><div class="big" style="color:var(--rd)">{{ fake_votes }}</div></div></div>
+<p style="font-size:13px">✦ The final assessment comes from the trained Hard Voting Classifier, not a count of all six predictions.</p></div></div>
+
+<div class="card" style="margin-top:22px"><span class="k">Explainable risk analysis</span><h3>Warning signs found in the text</h3>
+<p style="font-size:13px">A warning is not proof of fraud. It marks wording that deserves a closer look.</p>
+{% for w in warnings %}<div class="w"><span class="pill pa" style="height:fit-content">{{ w.rule }}</span><div><mark>{{ w.phrase }}</mark><small>In: {{ w.field }}. {{ w.why }}</small></div></div>
+{% else %}<div class="w"><div><b>No rule-based warning phrases found.</b><small>This does not guarantee the job is genuine. Keep verifying the employer.</small></div></div>{% endfor %}</div>
+
+{% if employer %}<div class="card" style="margin-top:22px"><span class="k">Employer consistency checklist</span><h3>What your details suggest</h3>
+<p style="font-size:13px">These are consistency checks on the details you typed. They are not independent verification.</p>
+{% for c in employer %}<div class="chk"><i class="{{ c.status }}_">{{ '✓' if c.status=='ok' else '!' if c.status=='warn' else 'i' }}</i><div><b>{{ c.label }}</b><small>{{ c.detail }}</small></div></div>{% endfor %}
+<span class="k" style="margin-top:18px">Verify it yourself</span>
+<div class="chk"><i class="info_">1</i><div>Search the company's official website and check the careers page lists this role.</div></div>
+<div class="chk"><i class="info_">2</i><div>Look for the company and recruiter on professional networks.</div></div>
+<div class="chk"><i class="info_">3</i><div>Call the company's official number, not one only given in the posting.</div></div></div>{% endif %}
+
+{% if metrics %}<div class="card" style="margin-top:22px"><span class="k">Model performance</span><h3>Accuracy comparison</h3><p style="font-size:13px;margin-bottom:8px">Held-out test accuracy. See the <a href="/performance" style="color:var(--ac)">Performance page</a> for F1 and recall.</p>
+{% for m in metrics %}{% set a = (m['Accuracy']|float*100) %}<div class="mr"><span>{{ m['Model'] }}</span><div class="bar"><i style="width:{{ a|round(2) }}%"></i></div><b style="text-align:right">{{ a|round(2) }}%</b></div>{% endfor %}</div>{% endif %}
+
+<div class="grid e2" style="margin-top:22px">
+<div class="card"><span class="k">Safety report</span><h3>Keep a copy</h3><p style="margin-bottom:16px;font-size:14px">Download the prediction, model results, warning signs and recommendations.</p>
+{% if scan_id %}<a class="btn" href="/report/{{ scan_id }}">Download report ↓</a>{% endif %}</div>
+<div class="card"><span class="k">Feedback</span><h3>Think this is wrong?</h3><p style="font-size:13px;margin-bottom:12px">Feedback is saved for review. It does not retrain the models automatically.</p>
+{% if scan_id %}<form method="POST" action="/feedback/{{ scan_id }}"><select name="opinion"><option value="incorrect_fake">Should be genuine</option><option value="incorrect_genuine">Should be fake</option><option value="other">Other comment</option></select><input name="note" placeholder="Optional note"><button class="btn g sm">Send feedback</button></form>{% endif %}</div></div>
+<div style="margin-top:22px"><a href="#checker" class="btn g">Check another posting ↗</a></div></section>{% endif %}
+
+<script>document.getElementById("sample").onclick=function(){var s={title:"Data Entry Executive - Work From Home",location:"Bengaluru, India",description:"Earn up to Rs 45,000 per week from home. No experience or interview needed. Pay a refundable registration fee of Rs 2,500 to receive your starter kit. Contact HR on WhatsApp to confirm your slot today. Apply now, limited slots.",requirements:"Basic typing. Smartphone with internet.",benefits:"Guaranteed income and weekly payout.",website:"example-jobs.com",recruiter_email:"hr.recruit@gmail.com",contact:"WhatsApp +91 90000 00000"};for(var k in s){var e=document.getElementById(k);if(e)e.value=s[k]}};</script>
+{% endblock %}
